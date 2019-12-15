@@ -7,9 +7,13 @@ import router from './router/router.js'
 import ElementUI from 'element-ui';
 //导入饿了么 的样式
 import 'element-ui/lib/theme-chalk/index.css';
+//导入axios
+// import axios from 'axios'
 //注册一下
 Vue.use(ElementUI);
-
+// Vue.prototype.$axios=axios
+// //axios的基地地址
+// axios.defaults.baseURL=""
 //导入全局样式
 import base from './style/base.css'
 Vue.use(base);

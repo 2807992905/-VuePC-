@@ -10,7 +10,7 @@
         <span class="span-02">用户登录</span>
       </div>
       <!--饿了么表单-->
-      <el-form :rules="rules" class="login-form" ref="form" :model="form">
+      <el-form :rules="rules" class="login-form" ref="form" :model= "form">
         <!--输入手机号-->
         <el-form-item prop="name">
           <el-input placeholder="请输入手机号" v-model="form.name" prefix-icon="el-icon-user"></el-input>
@@ -31,14 +31,11 @@
           <el-row>
             <!--列-->
             <el-col :span="18">
-              <div class="grid-content bg-purple">
-                <el-input placeholder="请输入验证码" v-model="form.type" prefix-icon="el-icon-key"></el-input>
-              </div>
+              <el-input placeholder="请输入验证码" v-model="form.type" prefix-icon="el-icon-key"></el-input>
             </el-col>
             <el-col :span="6">
-              <div class="grid-content bg-purple-light">
-                <img src="../../assets/img/验证码.png" alt />
-              </div>
+              <!--验证码图片-->
+              <img class="captcha" @click="changeCaptcha" :src="captchaURL" alt />
             </el-col>
           </el-row>
         </el-form-item>
@@ -63,6 +60,8 @@
 </template>
 
 <script>
+//导入axios
+import axios from "axios";
 export default {
   name: "login",
   data() {
@@ -119,12 +118,12 @@ export default {
           { required: true, message: "验证码不能为空", trigger: "change" },
           { min: 4, max: 4, message: "验证码长度为四", trigger: "change" }
         ]
-      }
+      },
+      //验证码地址
+      captchaURL: process.env.VUE_APP_BASEURL + "/captcha?type=login"
     };
   },
   methods: {
-    //表单验证方法
-
     //登录方法
     submitForm() {
       //是否勾选
@@ -135,7 +134,21 @@ export default {
         this.$refs.form.validate(valid => {
           if (valid) {
             //验证成功
-            this.$message.success("登录成功");
+            // this.$message.success("登录成功");
+            //调用接口
+            axios({
+              url: process.env.VUE_APP_BASEURL + "/login",
+              method: "post",
+              //设置跨域请求可以携带cookie
+              withCredentials: true,
+              data: {
+                phone: this.form.name,
+                password: this.form.password,
+                code: this.form.type
+              }
+            }).then(res => {
+              window.console.log(res);
+            });
           } else {
             //验证失败
             this.$message.error("登录失败");
@@ -143,6 +156,16 @@ export default {
           }
         });
       }
+    },
+    //验证码图片点击
+    changeCaptcha() {
+      //从1970年1月1日至今的毫秒数
+      this.captchaURL =
+        process.env.VUE_APP_BASEURL + "/captcha?type=login&" + Date.now(); //时间戳
+
+      //随机数
+      // this.captchaURL=
+      // process.env.VUE_APP_BASEURL + "/captcha?type=login&"+Math.random()//随机数
     }
   }
 };
@@ -206,7 +229,11 @@ export default {
     //饿了么表单盒子
     .login-form {
       margin-top: 26px;
-
+      //验证码
+      .captcha {
+        width: 100%;
+        height: 100%;
+      }
       .el-button {
         width: 100%;
       }
